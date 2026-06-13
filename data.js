@@ -33,7 +33,8 @@ window.NTE_DATA = {
         "7": 17,
         "8": 18,
         "9": 19,
-        "10": 20
+        "10": 20,
+        "11": 21
       }
     },
     {
@@ -52,7 +53,8 @@ window.NTE_DATA = {
         "7": 17,
         "8": 18,
         "9": 19,
-        "10": 20
+        "10": 20,
+        "11": 21
       }
     },
     {
@@ -62,6 +64,14 @@ window.NTE_DATA = {
       "hasLv": false,
       "ratio": 15,
       "description": "チーム全員キャラ攻撃力に +15% を加算（操作キャラの基礎攻撃力起算）"
+    },
+    {
+      "id": "nanari_skill",
+      "name": "ナナリスキル",
+      "type": "critDmg",
+      "hasLv": false,
+      "description": "ナナリのクリダメ+30%",
+      "ratio": 30
     }
   ],
   "arcs": [
