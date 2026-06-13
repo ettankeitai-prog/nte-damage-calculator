@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NTE データ管理ツール (data.js 編集用)</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:"Inter","Segoe UI",sans-serif;
+  background:linear-gradient(180deg,#f1f5f9,#e2e8f0);
+  color:#1e293b;
+  font-size:13px;
+  padding:24px 0;
+}
+.container{
+  width:min(1200px,96%);
+  margin:auto;
+}
+h1{
+  font-size:24px;
+  margin:0 0 8px;
+  font-weight:800;
+  color:#1e3a8a;
+}
+.subtitle{
+  color:#64748b;
+  margin-bottom:24px;
+}
+.card{
+  background:#ffffff;
+  border-radius:16px;
+  padding:20px;
+  margin-bottom:20px;
+  box-shadow:0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+}
+h2{
+  font-size:16px;
+  margin:0 0 16px;
+  color:#2563eb;
+  border-left:4px solid #2563eb;
+  padding-left:8px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.grid{display:grid;gap:12px}
+.grid-2{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.grid-3{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+.grid-6{grid-template-columns:repeat(6,1fr)}
+label{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  color:#475569;
+  font-size:11px;
+  font-weight:600;
+}
+input,select,textarea{
+  background:#f8fafc;
+  border:1px solid #cbd5e1;
+  border-radius:8px;
+  padding:8px 12px;
+  color:#0f172a;
+  min-height:36px;
+  font-family:inherit;
+}
+input:focus,select:focus,textarea:focus{
+  outline:none;
+  border-color:#3b82f6;
+  background:#ffffff;
+  box-shadow:0 0 0 3px rgba(59,130,246,0.15);
+}
+button{
+  border:none;
+  border-radius:8px;
+  padding:10px 16px;
+  font-weight:700;
+  cursor:pointer;
+  transition:.15s;
+  font-size:12px;
+}
+button:hover{
+  filter:brightness(1.05);
+  transform:translateY(-1px);
+}
+.btn-primary{background:#2563eb;color:white}
+.btn-success{background:#10b981;color:white}
+.btn-danger{background:#ef4444;color:white}
+.btn-secondary{background:#64748b;color:white}
+.flex{display:flex;gap:8px;flex-wrap:wrap}
+.list-item {
+  background:#f8fafc;
+  border:1px solid #e2e8f0;
+  border-radius:10px;
+  padding:12px;
+  margin-bottom:8px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.list-item-info {
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.list-item-name {
+  font-weight:700;
+  font-size:13px;
+}
+.list-item-meta {
+  font-size:11px;
+  color:#64748b;
+}
+.textarea-output{
+  width:100%;
+  height:240px;
+  font-family:monospace;
+  font-size:12px;
+  background:#0f172a;
+  color:#38bdf8;
+  padding:12px;
+  border-radius:8px;
+  resize:vertical;
+}
+.tabs{
+  display:flex;
+  gap:4px;
+  margin-bottom:16px;
+  border-bottom:2px solid #e2e8f0;
+  padding-bottom:1px;
+}
+.tab{
+  padding:10px 20px;
+  cursor:pointer;
+  font-weight:700;
+  color:#64748b;
+  border-radius:8px 8px 0 0;
+  border:1px solid transparent;
+  margin-bottom:-2px;
+}
+.tab.active{
+  color:#2563eb;
+  background:#ffffff;
+  border-color:#e2e8f0 #e2e8f0 transparent #e2e8f0;
+  border-bottom:2px solid #ffffff;
+}
+.tab-content{
+  display:none;
+}
+.tab-content.active{
+  display:block;
+}
+.import-box {
+  background: #f0fdf4;
+  border: 1px dashed #16a34a;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>NTE データ管理ツール</h1>
+  <div class="subtitle">計算機で使用する「キャラクターバフ」や「弧盤」のデータを直感的に追加・編集し、data.jsを読込・書出するためのツールです。</div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('buff-tab', this)">① バフデータの管理</div>
+    <div class="tab" onclick="switchTab('arc-tab', this)">② 弧盤データの管理</div>
+    <div class="tab" onclick="switchTab('export-tab', this)">③ data.js の読込 / 出力</div>
+  </div>
+
+  <div id="buff-tab" class="tab-content active">
+    <div class="grid grid-2" style="grid-template-columns: 1fr 1fr;">
+      
+      <div class="card">
+        <h2>新しいバフデータの入力</h2>
+        <div class="grid" style="gap:16px;">
+          <div class="grid grid-2">
+            <label>識別ID (重複不可・半角英数字)
+              <input type="text" id="buffId" placeholder="例: sagiri_ult_v2">
+            </label>
+            <label>バフ名 (表示用・日本語可)
+              <input type="text" id="buffName" placeholder="例: 早霧ULT(新)">
+            </label>
+          </div>
+
+          <label>バフ効果の種類（計算タイプ）
+            <select id="buffType" onchange="toggleBuffLvSection()">
+              <option value="attacker_base_ratio">発動キャラの基礎攻撃力起算 (早霧、ハニア等の加算バフ)</option>
+              <option value="main_char_base_ratio">操作キャラ(メイン)の基礎攻撃力起算 (音速ヘッジホッグ等)</option>
+              <option value="atkPercent">チーム全体の攻撃力 ＋N%</option>
+              <option value="critDmg">チーム全体のクリティカルダメージ ＋N%</option>
+              <option value="defIgnore">チーム全体の防御無視率 ＋N%</option>
+            </select>
+          </label>
+
+          <label style="flex-direction:row; gap:8px; align-items:center; cursor:pointer;">
+            <input type="checkbox" id="buffHasLv" onchange="toggleBuffLvSection()">
+            <span>スキルレベル(Lv1〜11)によって倍率が変化する</span>
+          </label>
+
+          <div id="buffFixedSection">
+            <label>バフ効果値 (%)
+              <input type="number" id="buffRatio" value="30" step="0.1">
+            </label>
+          </div>
+
+          <div id="buffLvSection" style="display:none; background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
+            <div style="font-weight:bold; font-size:11px; margin-bottom:8px; color:#475569;">各スキルレベルの効果値 (%)</div>
+            <div class="grid grid-3" style="gap:8px;">
+              <label>Lv1 <input type="number" id="buffLv1" value="10"></label>
+              <label>Lv2 <input type="number" id="buffLv2" value="12"></label>
+              <label>Lv3 <input type="number" id="buffLv3" value="14"></label>
+              <label>Lv4 <input type="number" id="buffLv4" value="16"></label>
+              <label>Lv5 <input type="number" id="buffLv5" value="18"></label>
+              <label>Lv6 <input type="number" id="buffLv6" value="20"></label>
+              <label>Lv7 <input type="number" id="buffLv7" value="22"></label>
+              <label>Lv8 <input type="number" id="buffLv8" value="24"></label>
+              <label>Lv9 <input type="number" id="buffLv9" value="26"></label>
+              <label>Lv10 <input type="number" id="buffLv10" value="30"></label>
+              <label style="color:#2563eb;">Lv11 <input type="number" id="buffLv11" value="33" style="border-color:#bfdbfe; background:#eff6ff;"></label>
+            </div>
+          </div>
+
+          <label>説明文
+            <textarea id="buffDescription" rows="2" placeholder="例: 味方全体のクリティカルダメージを上昇させる"></textarea>
+          </label>
+
+          <div class="flex" style="justify-content: flex-end; margin-top:8px;">
+            <button class="btn-primary" onclick="addBuffData()">リストに追加・更新</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>現在の登録バフ一覧 <span style="font-size:11px; color:#64748b; font-weight:normal;">※クリックでフォームに読み込んで編集できます</span></h2>
+        <div id="buffList" style="max-height:450px; overflow-y:auto;"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="arc-tab" class="tab-content">
+    <div class="grid grid-2" style="grid-template-columns: 1fr 1fr;">
+      
+      <div class="card">
+        <h2>新しい弧盤データの入力</h2>
+        <div class="grid" style="gap:14px;">
+          <div class="grid grid-2">
+            <label>識別ID (重複不可・半角英数字)
+              <input type="text" id="arcId" placeholder="例: last_rose">
+            </label>
+            <label>弧盤名 (表示用・日本語可)
+              <input type="text" id="arcName" placeholder="例: ラストローズ">
+            </label>
+          </div>
+
+          <div style="background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0;">
+            <div style="font-weight:bold; font-size:11px; margin-bottom:6px; color:#475569;">メインステータス（攻撃力実数値）</div>
+            <div class="grid grid-2">
+              <label>Lv1 時の値 <input type="number" id="arcAtkMin" value="45"></label>
+              <label>Lv80 時の値 <input type="number" id="arcAtkMax" value="400"></label>
+            </div>
+          </div>
+
+          <div style="background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0;">
+            <div style="font-weight:bold; font-size:11px; margin-bottom:6px; color:#475569;">サブステータス</div>
+            <div class="grid grid-3" style="grid-template-columns: 1.2fr 1fr 1fr;">
+              <label>ステータス種類
+                <select id="arcSubStatType">
+                  <option value="critRate">クリティカル率%</option>
+                  <option value="critDmg">クリティカルダメージ%</option>
+                  <option value="atkPercent">攻撃力%</option>
+                </select>
+              </label>
+              <label>Lv1 時の値 <input type="number" id="arcSubMin" value="2.4" step="0.1"></label>
+              <label>Lv80 時の値 <input type="number" id="arcSubMax" value="12.0" step="0.1"></label>
+            </div>
+          </div>
+
+          <div style="background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0;">
+            <div style="font-weight:bold; font-size:11px; margin-bottom:6px; color:#475569;">特殊効果 1</div>
+            <label style="margin-bottom:6px;">効果の種類
+              <select id="arcEffect1Type">
+                <option value="atkPercent">攻撃力%</option>
+                <option value="critDmg">クリティカルダメージ%</option>
+                <option value="damage">与ダメ・属性ダメ%</option>
+                <option value="specialDamage">特効ダメ%</option>
+              </select>
+            </label>
+            <div style="font-size:10px; color:#64748b; margin-bottom:4px; display:flex; justify-content:space-between; align-items:center;">
+              <span>凸数ごとの効果値 (%) (0凸〜5凸)</span>
+              <button type="button" class="btn-secondary" style="padding:2px 8px; font-size:10px; min-height:22px; background:#475569;" onclick="autoCalcArc凸(1)">5凸から自動補完</button>
+            </div>
+            <div class="grid grid-6">
+              <label>0凸<input type="number" id="arcE1_0" value="10" step="0.1"></label>
+              <label>1凸<input type="number" id="arcE1_1" value="12" step="0.1"></label>
+              <label>2凸<input type="number" id="arcE1_2" value="14" step="0.1"></label>
+              <label>3凸<input type="number" id="arcE1_3" value="16" step="0.1"></label>
+              <label>4凸<input type="number" id="arcE1_4" value="18" step="0.1"></label>
+              <label>5凸<input type="number" id="arcE1_5" value="20" step="0.1"></label>
+            </div>
+          </div>
+
+          <div style="background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0;">
+            <div style="font-weight:bold; font-size:11px; margin-bottom:6px; color:#475569;">特殊効果 2</div>
+            <label style="margin-bottom:6px;">効果の種類
+              <select id="arcEffect2Type">
+                <option value="critDmg" selected>クリティカルダメージ%</option>
+                <option value="atkPercent">攻撃力%</option>
+                <option value="damage">与ダメ・属性ダメ%</option>
+                <option value="specialDamage">特効ダメ%</option>
+              </select>
+            </label>
+            <div style="font-size:10px; color:#64748b; margin-bottom:4px; display:flex; justify-content:space-between; align-items:center;">
+              <span>凸数ごとの効果値 (%) (0凸〜5凸)</span>
+              <button type="button" class="btn-secondary" style="padding:2px 8px; font-size:10px; min-height:22px; background:#475569;" onclick="autoCalcArc凸(2)">5凸から自動補完</button>
+            </div>
+            <div class="grid grid-6">
+              <label>0凸<input type="number" id="arcE2_0" value="15" step="0.1"></label>
+              <label>1凸<input type="number" id="arcE2_1" value="18" step="0.1"></label>
+              <label>2凸<input type="number" id="arcE2_2" value="21" step="0.1"></label>
+              <label>3凸<input type="number" id="arcE2_3" value="24" step="0.1"></label>
+              <label>4凸<input type="number" id="arcE2_4" value="27" step="0.1"></label>
+              <label>5凸<input type="number" id="arcE2_5" value="30" step="0.1"></label>
+            </div>
+          </div>
+
+          <div class="flex" style="justify-content: flex-end; margin-top:4px;">
+            <button class="btn-primary" onclick="addArcData()">リストに追加・更新</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>現在の登録弧盤一覧 <span style="font-size:11px; color:#64748b; font-weight:normal;">※クリックでフォームに読み込んで編集できます</span></h2>
+        <div id="arcList" style="max-height:550px; overflow-y:auto;"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="export-tab" class="tab-content">
+    
+    <div class="card import-box">
+      <h2 style="color:#16a34a; border-left-color:#16a34a; margin-bottom:8px;">既存の data.js を読み込む</h2>
+      <p style="margin-top:0; color:#1e293b;">
+        現在GitHubやパソコン内に保存してある <b>`data.js`</b> ファイルを選択してください。<br>
+        登録されているデータをこの管理ツールに復元し、続きから追加・編集・修正を行えるようになります。
+      </p>
+      <label style="background:white; padding:12px; border-radius:8px; border:1px solid #cbd5e1; display:inline-block; cursor:pointer;">
+        <input type="file" id="importFileInput" accept=".js" onchange="importDataJS(event)">
+      </label>
+    </div>
+
+    <div class="card">
+      <h2>data.js の生成コード</h2>
+      <p style="margin-top:0; color:#475569;">新しく追加・編集したすべてのデータを含むコードです。<b>「ファイルとしてダウンロード」</b>ボタンを押して現在の `data.js` を上書きしてください。</p>
+      
+      <textarea id="outputArea" class="textarea-output" readonly></textarea>
+      
+      <div class="flex" style="margin-top:16px;">
+        <button class="btn-success" style="font-size:14px; padding:12px 24px;" onclick="downloadDataJS()">⬇ data.js をファイルとしてダウンロード</button>
+        <button class="btn-primary" style="font-size:14px; padding:12px 24px;" onclick="copyToClipboard()">📋 コードをクリップボードにコピー</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ==========================================
+// 初期・マスターデータ（初期状態のデフォルト保持・Lv11倍率を仮拡張してあります）
+// ==========================================
+let masterData = {
+  presets: [
+    { id: "custom", name: "カスタム（手動入力）", type: "custom" },
+    { id: "sagiri_ult", name: "早霧ULT", type: "attacker_base_ratio", hasLv: false, ratio: 30, description: "早霧の基礎攻撃力 × 30% を全キャラに実数値加算" },
+    { id: "hania_skill", name: "ハニアスキル", type: "attacker_base_ratio", hasLv: true, ratios: {1:10, 2:12, 3:14, 4:16, 5:18, 6:20, 7:22, 8:24, 9:26, 10:30, 11:32}, description: "ハニアの基礎攻撃力 × スキルLvの% を全キャラに実数値加算" },
+    { id: "hania_ult", name: "ハニアULT", type: "attacker_base_ratio", hasLv: true, ratios: {1:20, 2:23, 3:26, 4:29, 5:32, 6:35, 7:38, 8:41, 9:44, 10:50, 11:53}, description: "ハニアの基礎攻撃力 × スキルLvの% を全キャラに実数値加算" },
+    { id: "sonic_hedgehog", name: "ギア：音速ヘッジホッグ", type: "main_char_base_ratio", hasLv: false, ratio: 15, description: "チーム全員キャラ攻撃力に +15% を加算（操作キャラの基礎攻撃力起算）" }
+  ],
+  arcs: [
+    { id: "custom", name: "カスタム（手動入力）" },
+    { id: "last_rose", name: "ラストローズ", baseAtkMin: 45, baseAtkMax: 400, subStatType: "critRate", subStatMin: 2.4, subStatMax: 12.0, effect1Type: "atkPercent", effect1Values: [10, 12, 14, 16, 18, 20], effect2Type: "critDmg", effect2Values: [15, 18, 21, 24, 27, 30] }
+  ]
+};
+
+function switchTab(tabId, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(tabId).classList.add('active');
+  if (tabId === 'export-tab') { generateCode(); }
+}
+
+function importDataJS(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const text = e.target.result;
+      if (!text.includes('window.NTE_DATA')) {
+        alert('選択されたファイル内に "window.NTE_DATA" の記述が見つかりません。');
+        return;
+      }
+      const scriptCode = text.replace(/window\.NTE_DATA\s*=/, "return ");
+      const importedData = new Function(scriptCode)();
+      if (!importedData || !importedData.presets || !importedData.arcs) {
+        alert('データの構造が正しくありません。');
+        return;
+      }
+      masterData = importedData;
+      if (!masterData.presets.some(p => p.id === 'custom')) {
+        masterData.presets.unshift({ id: "custom", name: "カスタム（手動入力）", type: "custom" });
+      }
+      if (!masterData.arcs.some(a => a.id === 'custom')) {
+        masterData.arcs.unshift({ id: "custom", name: "カスタム（手動入力）" });
+      }
+      renderLists();
+      generateCode();
+      alert('🎉 既存の data.js を正常に読み込みました！');
+    } catch (err) {
+      console.error(err);
+      alert('ファイルの解析に失敗しました。');
+    }
+    event.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+function autoCalcArc凸(effectNum) {
+  const maxVal = Number(document.getElementById(`arcE${effectNum}_5`).value || 0);
+  if (maxVal === 0) { alert('5凸の数値を入力してからボタンを押してください。'); return; }
+  const minVal = maxVal / 2;
+  const step = (maxVal - minVal) / 5;
+  document.getElementById(`arcE${effectNum}_0`).value = Math.round(minVal * 10) / 10;
+  document.getElementById(`arcE${effectNum}_1`).value = Math.round((minVal + step * 1) * 10) / 10;
+  document.getElementById(`arcE${effectNum}_2`).value = Math.round((minVal + step * 2) * 10) / 10;
+  document.getElementById(`arcE${effectNum}_3`).value = Math.round((minVal + step * 3) * 10) / 10;
+  document.getElementById(`arcE${effectNum}_4`).value = Math.round((minVal + step * 4) * 10) / 10;
+}
+
+function toggleBuffLvSection() {
+  const hasLv = document.getElementById('buffHasLv').checked;
+  document.getElementById('buffFixedSection').style.display = hasLv ? 'none' : 'block';
+  document.getElementById('buffLvSection').style.display = hasLv ? 'block' : 'none';
+}
+
+function addBuffData() {
+  const id = document.getElementById('buffId').value.trim();
+  const name = document.getElementById('buffName').value.trim();
+  if(!id || !name) { alert('識別IDとバフ名を入力してください'); return; }
+  
+  const type = document.getElementById('buffType').value;
+  const hasLv = document.getElementById('buffHasLv').checked;
+  const description = document.getElementById('buffDescription').value;
+  
+  let newData = { id, name, type, hasLv, description };
+  
+  if (hasLv) {
+    newData.ratios = {};
+    // ★1から11までループを拡張
+    for(let i=1; i<=11; i++) {
+      newData.ratios[i] = Number(document.getElementById('buffLv' + i).value || 0);
+    }
+  } else {
+    newData.ratio = Number(document.getElementById('buffRatio').value || 0);
+  }
+  
+  const index = masterData.presets.findIndex(p => p.id === id);
+  if(index >= 0) { masterData.presets[index] = newData; } else { masterData.presets.push(newData); }
+  renderLists();
+  clearBuffForm();
+}
+
+function addArcData() {
+  const id = document.getElementById('arcId').value.trim();
+  const name = document.getElementById('arcName').value.trim();
+  if(!id || !name) { alert('識別IDと弧盤名を入力してください'); return; }
+  
+  let newData = {
+    id, name,
+    baseAtkMin: Number(document.getElementById('arcAtkMin').value || 0),
+    baseAtkMax: Number(document.getElementById('arcAtkMax').value || 0),
+    subStatType: document.getElementById('arcSubStatType').value,
+    subStatMin: Number(document.getElementById('arcSubMin').value || 0),
+    subStatMax: Number(document.getElementById('arcSubMax').value || 0),
+    effect1Type: document.getElementById('arcEffect1Type').value,
+    effect1Values: [
+      Number(document.getElementById('arcE1_0').value || 0), Number(document.getElementById('arcE1_1').value || 0),
+      Number(document.getElementById('arcE1_2').value || 0), Number(document.getElementById('arcE1_3').value || 0),
+      Number(document.getElementById('arcE1_4').value || 0), Number(document.getElementById('arcE1_5').value || 0)
+    ],
+    effect2Type: document.getElementById('arcEffect2Type').value,
+    effect2Values: [
+      Number(document.getElementById('arcE2_0').value || 0), Number(document.getElementById('arcE2_1').value || 0),
+      Number(document.getElementById('arcE2_2').value || 0), Number(document.getElementById('arcE2_3').value || 0),
+      Number(document.getElementById('arcE2_4').value || 0), Number(document.getElementById('arcE2_5').value || 0)
+    ]
+  };
+  
+  const index = masterData.arcs.findIndex(a => a.id === id);
+  if(index >= 0) { masterData.arcs[index] = newData; } else { masterData.arcs.push(newData); }
+  renderLists();
+  clearArcForm();
+}
+
+function deleteBuff(id, event) { event.stopPropagation(); if(id === 'custom') return; masterData.presets = masterData.presets.filter(p => p.id !== id); renderLists(); }
+function deleteArc(id, event) { event.stopPropagation(); if(id === 'custom') return; masterData.arcs = masterData.arcs.filter(a => a.id !== id); renderLists(); }
+
+function loadBuffToForm(id) {
+  const p = masterData.presets.find(b => b.id === id);
+  if(!p || p.id === 'custom') return;
+  
+  document.getElementById('buffId').value = p.id;
+  document.getElementById('buffName').value = p.name;
+  document.getElementById('buffType').value = p.type;
+  document.getElementById('buffHasLv').checked = !!p.hasLv;
+  document.getElementById('buffDescription').value = p.description || '';
+  
+  if(p.hasLv && p.ratios) {
+    // ★1から11までに拡張
+    for(let i=1; i<=11; i++) {
+      document.getElementById('buffLv' + i).value = p.ratios[i] || 0;
+    }
+  } else {
+    document.getElementById('buffRatio').value = p.ratio || 0;
+  }
+  toggleBuffLvSection();
+}
+
+function loadArcToForm(id) {
+  const a = masterData.arcs.find(arc => arc.id === id);
+  if(!a || a.id === 'custom') return;
+  document.getElementById('arcId').value = a.id;
+  document.getElementById('arcName').value = a.name;
+  document.getElementById('arcAtkMin').value = a.baseAtkMin;
+  document.getElementById('arcAtkMax').value = a.baseAtkMax;
+  document.getElementById('arcSubStatType').value = a.subStatType;
+  document.getElementById('arcSubMin').value = a.subStatMin;
+  document.getElementById('arcSubMax').value = a.subStatMax;
+  document.getElementById('arcEffect1Type').value = a.effect1Type;
+  document.getElementById('arcEffect2Type').value = a.effect2Type;
+  for(let i=0; i<=5; i++) {
+    document.getElementById('arcE1_' + i).value = a.effect1Values[i] || 0;
+    document.getElementById('arcE2_' + i).value = a.effect2Values[i] || 0;
+  }
+}
+
+function clearBuffForm() { document.getElementById('buffId').value = ''; document.getElementById('buffName').value = ''; document.getElementById('buffDescription').value = ''; }
+function clearArcForm() { document.getElementById('arcId').value = ''; document.getElementById('arcName').value = ''; }
+
+function renderLists() {
+  const buffListEl = document.getElementById('buffList');
+  buffListEl.innerHTML = '';
+  masterData.presets.forEach(p => {
+    if(p.id === 'custom') return;
+    const div = document.createElement('div');
+    div.className = 'list-item';
+    div.onclick = () => loadBuffToForm(p.id);
+    div.innerHTML = `
+      <div class="list-item-info">
+        <span class="list-item-name">${p.name} <span style="font-weight:normal; font-size:10px; color:#94a3b8;">(${p.id})</span></span>
+        <span class="list-item-meta">${p.description || (p.hasLv ? 'レベル変動型バフ' : '固定バフ: ' + p.ratio + '%')}</span>
+      </div>
+      <button class="btn-danger" style="padding:4px 8px; font-size:10px;" onclick="deleteBuff('${p.id}', event)">削除</button>
+    `;
+    buffListEl.appendChild(div);
+  });
+
+  const arcListEl = document.getElementById('arcList');
+  arcListEl.innerHTML = '';
+  masterData.arcs.forEach(a => {
+    if(a.id === 'custom') return;
+    const div = document.createElement('div');
+    div.className = 'list-item';
+    div.onclick = () => loadArcToForm(a.id);
+    div.innerHTML = `
+      <div class="list-item-info">
+        <span class="list-item-name">${a.name} <span style="font-weight:normal; font-size:10px; color:#94a3b8;">(${a.id})</span></span>
+        <span class="list-item-meta">攻撃力: ${a.baseAtkMin}〜${a.baseAtkMax} | サブ: ${a.subStatType}</span>
+      </div>
+      <button class="btn-danger" style="padding:4px 8px; font-size:10px;" onclick="deleteArc('${a.id}', event)">削除</button>
+    `;
+    arcListEl.appendChild(div);
+  });
+}
+
+function generateCode() {
+  const code = `// ==========================================
+// NTE ダメージ計算機 プリセットデータ管理ファイル
+// ==========================================
+
+window.NTE_DATA = ${JSON.stringify(masterData, null, 2)};`;
+  document.getElementById('outputArea').value = code;
+}
+
+function copyToClipboard() {
+  generateCode();
+  const textarea = document.getElementById('outputArea');
+  textarea.select();
+  document.execCommand('copy');
+  alert('コードをクリップボードにコピーしました！');
+}
+
+function downloadDataJS() {
+  generateCode();
+  const code = document.getElementById('outputArea').value;
+  const blob = new Blob([code], { type: 'text/javascript;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'data.js'; a.click(); URL.revokeObjectURL(url);
+}
+
+window.addEventListener('DOMContentLoaded', () => { renderLists(); });
+</script>
+</body>
+</html>
