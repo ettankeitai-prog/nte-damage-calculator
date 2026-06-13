@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NTE ダメージ計算機</title>
+  <!-- CSSファイルを読み込み -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -70,6 +71,7 @@
       <button class="secondary" id="showDetailBtn" onclick="switchFormMode('detail')">詳細入力</button>
     </div>
 
+    <!-- 簡易入力フォーム -->
     <div id="simpleFormSection" class="card">
       <h3>簡易入力用フォーム</h3>
       <div class="grid grid-3">
@@ -97,8 +99,31 @@
         <label>属性ダメージ強化%<input type="number" id="simpleElementDamage" value="0"></label>
       </div>
 
+      <!-- ★簡易入力側に移植：弧盤プリセットUI -->
+      <h4 style="margin-top:14px">・弧盤プリセット選択</h4>
+      <div class="grid grid-3" style="background: rgba(37, 99, 235, 0.05); padding: 12px; border-radius: 12px; margin-bottom: 12px; border: 1px solid rgba(37, 99, 235, 0.15);">
+        <label>弧盤プリセット
+          <select id="arcPresetSelect" onchange="onArcPresetChange()"></select>
+        </label>
+        <label>弧盤レベル (1〜80)
+          <input type="number" id="arcLevel" value="80" min="1" max="80" oninput="onArcPresetChange()">
+        </label>
+        <label>限界突破 (凸数 0〜5)
+          <select id="arcTarget" onchange="onArcPresetChange()">
+            <option value="0">0凸</option>
+            <option value="1">1凸</option>
+            <option value="2">2凸</option>
+            <option value="3">3凸</option>
+            <option value="4">4凸</option>
+            <option value="5" selected>5凸（完凸）</option>
+          </select>
+        </label>
+      </div>
+
       <h4 style="margin-top:14px">・弧盤効果入力</h4>
       <div class="grid grid-3">
+        <!-- ★新設：プリセットから自動代入される攻撃力枠 -->
+        <label>弧盤攻撃力(実数値)<input type="number" id="simpleArcAtk" value="0"></label>
         <label>攻撃力%<input type="number" id="simpleArcAtkPercent" value="0"></label>
         <label>与ダメ%<input type="number" id="simpleArcDamage" value="0"></label>
         <label>クリ率%<input type="number" id="simpleArcCritRate" value="0"></label>
@@ -116,6 +141,7 @@
       </div>
     </div>
 
+    <!-- 詳細入力フォーム (Manual入力に戻しました) -->
     <div id="detailFormSection" class="card" style="display:none">
       <h3>詳細入力用フォーム</h3>
       <div style="margin-top:12px">
@@ -142,25 +168,6 @@
         </div>
 
         <h3>【弧盤】</h3>
-        <div class="grid grid-3" style="background: rgba(37, 99, 235, 0.05); padding: 12px; border-radius: 12px; margin-bottom: 12px; border: 1px solid rgba(37, 99, 235, 0.15);">
-          <label>弧盤プリセット
-            <select id="arcPresetSelect" onchange="onArcPresetChange()"></select>
-          </label>
-          <label>弧盤レベル (1〜80)
-            <input type="number" id="arcLevel" value="80" min="1" max="80" oninput="onArcPresetChange()">
-          </label>
-          <label>限界突破 (凸数 0〜5)
-            <select id="arcTarget" onchange="onArcPresetChange()">
-              <option value="0">0凸</option>
-              <option value="1">1凸</option>
-              <option value="2">2凸</option>
-              <option value="3">3凸</option>
-              <option value="4">4凸</option>
-              <option value="5" selected>5凸（完凸）</option>
-            </select>
-          </label>
-        </div>
-
         <h4>メイン効果</h4>
         <div class="grid grid-3">
           <label>攻撃力<input type="number" id="arcAtk" value="0"></label>
@@ -197,6 +204,7 @@
       </div>
     </div>
 
+    <!-- バフ情報入力欄 -->
     <div class="card">
       <div class="compact-title">
         <h2>バフ情報入力欄</h2>
@@ -224,6 +232,7 @@
     </div>
   </div>
 
+  <!-- 保存 / 読込 -->
   <div class="card">
     <div class="compact-title">
       <h2>入力済み情報の書き出し / 読み込み</h2>
@@ -237,6 +246,7 @@
   </div>
 </div>
 
+<!-- JavaScriptファイルを順番に読み込み -->
 <script src="data.js"></script>
 <script src="app.js"></script>
 </body>

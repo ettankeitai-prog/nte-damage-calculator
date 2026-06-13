@@ -23,7 +23,7 @@ function switchFormMode(mode){
   if(detailBtn) detailBtn.className = mode === 'detail' ? 'primary' : 'secondary';
 }
 
-// 弧盤プリセットが変更された時の処理
+// 弧盤プリセット変更処理（簡易入力側の各フォームへ代入するように変更）
 function onArcPresetChange() {
   const presetId = document.getElementById('arcPresetSelect').value;
   if (presetId === 'custom') return; // 手動入力なら何もしない
@@ -32,7 +32,7 @@ function onArcPresetChange() {
   if (!arc) return;
 
   const lv = Number(document.getElementById('arcLevel').value || 80);
-  const凸 = Number(document.getElementById('arcTarget').value || 5);
+  const 凸 = Number(document.getElementById('arcTarget').value || 5);
 
   // レベル比例計算用 (Lv1〜Lv80を直線的に補間)
   const calcStat = (min, max) => {
@@ -46,28 +46,39 @@ function onArcPresetChange() {
   const eff1Val = arc.effect1Values[凸] || 0;
   const eff2Val = arc.effect2Values[凸] || 0;
 
-  // フォームへ値を代入
-  document.getElementById('arcAtk').value = arcAtk;
+  // 簡易入力用フォームへ値をセット
+  document.getElementById('simpleArcAtk').value = arcAtk;
   
-  // 一旦リセット
-  document.getElementById('arcAtkPercent').value = 0;
-  document.getElementById('arcCrit').value = 0;
-  document.getElementById('arcCritDmg').value = 0;
+  // 一旦数値をリセット
+  document.getElementById('simpleArcAtkPercent').value = 0;
+  document.getElementById('simpleArcCritRate').value = 0;
+  document.getElementById('simpleArcCritDamage').value = 0;
+  document.getElementById('simpleArcDamage').value = 0;
+  document.getElementById('simpleArcElement').value = 0;
 
-  if (arc.subStatType === 'critRate') document.getElementById('arcCrit').value = subStatVal;
-  if (arc.subStatType === 'critDmg') document.getElementById('arcCritDmg').value = subStatVal;
-  if (arc.subStatType === 'atkPercent') document.getElementById('arcAtkPercent').value = subStatVal;
+  // サブステータスの種類に応じて代入
+  if (arc.subStatType === 'critRate') document.getElementById('simpleArcCritRate').value = subStatVal;
+  if (arc.subStatType === 'critDmg') document.getElementById('simpleArcCritDamage').value = subStatVal;
+  if (arc.subStatType === 'atkPercent') document.getElementById('simpleArcAtkPercent').value = subStatVal;
 
-  document.getElementById('arcEffectAtk').value = 0;
-  document.getElementById('arcDamage').value = 0;
-  document.getElementById('arcEffectCritDmg').value = 0;
-  document.getElementById('specialDamage').value = 0;
-
+  // 特殊効果を代入（重複した場合はきれいに合算します）
   const setEffectValue = (type, val) => {
-    if (type === 'atkPercent') document.getElementById('arcEffectAtk').value = val;
-    if (type === 'damage' || type === 'element') document.getElementById('arcDamage').value = val;
-    if (type === 'critDmg') document.getElementById('arcEffectCritDmg').value = val;
-    if (type === 'specialDamage') document.getElementById('specialDamage').value = val;
+    if (type === 'atkPercent') {
+      document.getElementById('simpleArcAtkPercent').value = Number(document.getElementById('simpleArcAtkPercent').value) + val;
+    }
+    if (type === 'damage') {
+      document.getElementById('simpleArcDamage').value = Number(document.getElementById('simpleArcDamage').value) + val;
+    }
+    if (type === 'element') {
+      document.getElementById('simpleArcElement').value = Number(document.getElementById('simpleArcElement').value) + val;
+    }
+    if (type === 'critDmg') {
+      document.getElementById('simpleArcCritDamage').value = Number(document.getElementById('simpleArcCritDamage').value) + val;
+    }
+    if (type === 'specialDamage') {
+      // 簡易側には特効項目がないため汎用の与ダメに加算します
+      document.getElementById('simpleArcDamage').value = Number(document.getElementById('simpleArcDamage').value) + val;
+    }
   };
 
   setEffectValue(arc.effect1Type, eff1Val);
@@ -107,7 +118,7 @@ function getBuffs(){
   const buffs = [];
   let mainCharBaseAtk = 0;
   if(currentFormMode === 'simple'){
-    mainCharBaseAtk = getNumber('simpleAtk');
+    mainCharBaseAtk = getNumber('simpleAtk') + getNumber('simpleArcAtk');
   } else {
     mainCharBaseAtk = getNumber('charAtk') + getNumber('arcAtk');
   }
@@ -171,6 +182,7 @@ function calculateDamage(){
     if(!buildName){ alert('入力名を設定してください'); return; }
 
     const characterAtk = getNumber('simpleAtk');
+    const arcAtk = getNumber('simpleArcAtk'); // 簡易側に新設した基礎ステータス
     const gearFlatAtk = getNumber('simpleGearFlatAtk');
 
     atkPercent = (
@@ -200,7 +212,10 @@ function calculateDamage(){
 
     defenseMultiplier = 1 / (1 + (enemyDefRate * (1 - defIgnoreRate)));
     const flatBuffAtk = currentBuffs.reduce((sum,b)=> sum + (b.baseAtk * (b.skillAtk / 100)), 0);
-    finalAtk = (characterAtk * (1 + atkPercent)) + gearFlatAtk + flatBuffAtk;
+    
+    // キャラ攻撃力と弧盤攻撃力を足して基礎攻撃力を算出
+    const baseAtk = characterAtk + arcAtk;
+    finalAtk = (baseAtk * (1 + atkPercent)) + gearFlatAtk + flatBuffAtk;
   }
   else {
     buildName = document.getElementById('buildName')?.value.trim();
@@ -248,7 +263,7 @@ function calculateDamage(){
   const expectedCritMultiplier = 1 + ((critRate / 100) * critDamage);
   const nonCritDamage = finalAtk * skillMultiplier * damageMultiplier * defenseMultiplier;
   const critDamageValue = nonCritDamage * (1 + critDamage);
-  const expectedDamage = nonCritDamage * expectedCritMultiplier;
+  const expectedDamage = finalAtk * skillMultiplier * damageMultiplier * expectedCritMultiplier * defenseMultiplier;
 
   const defIgnoreExpected = finalAtk * skillMultiplier * damageMultiplier * (1 / (1 + (enemyDefRate * (1 - (defIgnoreRate + 0.01))))) * expectedCritMultiplier;
   const defIgnoreGain = defIgnoreExpected - expectedDamage;
@@ -370,7 +385,6 @@ function deleteBuild(name){
   localStorage.setItem('nte_saved_builds', JSON.stringify(savedBuilds));
 }
 
-// バフ追加ボタンが押された時の処理
 function addBuffCard(){
   const wrap = document.getElementById('buffContainer');
   if(!wrap) return;
@@ -423,9 +437,7 @@ function addBuffCard(){
   wrap.appendChild(div);
 }
 
-// 初期起動時の処理
 window.addEventListener('DOMContentLoaded', () => {
-  // 弧盤選択欄のリストをdata.jsから自動生成
   const select = document.getElementById('arcPresetSelect');
   if (select) {
     window.NTE_DATA.arcs.forEach(arc => {
