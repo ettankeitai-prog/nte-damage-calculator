@@ -1,430 +1,218 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NTE ダメージ計算機</title>
-<style>
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:"Inter","Segoe UI",sans-serif;
-  background:linear-gradient(180deg,#f8fafc,#eef4ff 55%,#e8eefc);
-  color:#1e293b;
-  font-size:13px;
-}
-.container{
-  width:min(1500px,96%);
-  margin:auto;
-  padding:16px 0 48px;
-}
-h1{
-  font-size:26px;
-  margin:0 0 14px;
-  font-weight:800;
-  color:#2563eb;
-}
-.card{
-  background:rgba(255,255,255,.88);
-  backdrop-filter:blur(10px);
-  border:1px solid rgba(148,163,184,.18);
-  border-radius:18px;
-  padding:14px;
-  margin-bottom:12px;
-  box-shadow:0 8px 24px rgba(30,41,59,.08);
-}
-h2,h3,h4{
-  margin:0 0 10px;
-  color:#1e293b;
-}
-.grid{display:grid;gap:8px}
-.grid-2{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
-.grid-3{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
-label{
-  display:flex;
-  flex-direction:column;
-  gap:4px;
-  color:#475569;
-  font-size:11px;
-}
-input,textarea{
-  background:#ffffff;
-  border:1px solid rgba(148,163,184,.35);
-  border-radius:10px;
-  padding:9px;
-  color:#0f172a;
-  min-height:36px;
-}
-input:focus,textarea:focus{
-  outline:none;
-  border-color:#60a5fa;
-  box-shadow:0 0 0 2px rgba(96,165,250,.18);
-}
-button{
-  border:none;
-  border-radius:10px;
-  padding:9px 14px;
-  font-weight:700;
-  cursor:pointer;
-  transition:.16s;
-  font-size:12px;
-}
-button:hover{
-  transform:translateY(-1px);
-  filter:brightness(1.04);
-}
-.primary{background:linear-gradient(135deg,#3b82f6,#60a5fa);color:white}
-.success{background:linear-gradient(135deg,#10b981,#34d399);color:white}
-.warn{background:linear-gradient(135deg,#f59e0b,#fbbf24);color:white}
-.danger{background:linear-gradient(135deg,#ef4444,#f87171);color:white}
-.secondary{background:#64748b;color:white}
-.flex{display:flex;gap:8px;flex-wrap:wrap}
-.table-wrap{overflow:auto;border-radius:12px}
-table{width:100%;border-collapse:collapse}
-th,td{
-  padding:8px;
-  text-align:center;
-  border-bottom:1px solid rgba(148,163,184,.14);
-  white-space:nowrap;
-}
-th{
-  background:#eff6ff;
-  position:sticky;
-  top:0;
-  z-index:1;
-  color:#2563eb;
-}
-tr:hover td{background:#f8fbff}
-.result-box{
-  background:#f8fbff;
-  border:1px solid rgba(96,165,250,.35);
-  border-radius:14px;
-  padding:14px;
-  margin-top:12px;
-}
-.buff-card{
-  background:#f8fbff;
-  border:1px solid rgba(148,163,184,.12);
-  border-radius:12px;
-  padding:10px;
-  margin-bottom:8px;
-}
-summary{
-  cursor:pointer;
-  font-size:15px;
-  font-weight:700;
-  color:#2563eb;
-}
-hr{
-  border:none;
-  border-top:1px solid rgba(148,163,184,.18);
-  margin:10px 0;
-}
-.rank1 td{
-  background:#eff6ff;
-  box-shadow:inset 0 0 0 1px rgba(96,165,250,.4);
-}
-.progress-wrap{
-  width:120px;
-  height:10px;
-  background:#dbeafe;
-  border-radius:999px;
-  overflow:hidden;
-  margin:auto;
-}
-.progress-bar{
-  height:100%;
-  background:linear-gradient(90deg,#3b82f6,#93c5fd);
-}
-.compact-title{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:8px;
-}
-.small{
-  color:#64748b;
-  font-size:11px;
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NTE ダメージ計算機</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="container">
   <h1>NTE ダメージ計算機</h1>
 
   <div class="card">
-<h2>基本情報</h2>
-<div style="line-height:1.9">
-<p>NTE向けダメージ計算機です。</p>
-<p>現在検証結果として信憑性が高いのではないかと言われている、計算式を元に作成しています。<br>検証した結果ある程度正しいかとは思いますが参考として利用してください。</p>
-<h3>●数値の入力方法について●</h3>
-<h4>◯簡易入力◯</h4>
-<p>操作キャラのステータスに詳細表示されている数値をそのまま入力してください。<br>サクッとダメージの計算をしたい場合におすすめです。</p>
-<h4>◯詳細入力◯</h4>
-<p>キャラ、弧盤、ギアなどの情報を個別に入力可能です。<br>弧盤を変えた場合ギアを変えた場合など細かい検証にどうぞ。</p>
-<h3>●データの保存について●</h3>
-<p>下部にあるcsv書き出しで計算結果のダウンロードが可能です。<br>本サイトで再利用を行う際はjsonバックアップを行ってください。</p>
-</div>
-<details style="margin-top:12px">
-<summary>基本計算式を表示</summary>
-<div style="margin-top:12px;line-height:1.9">
-<p>●基本計算式●</p>
-<p>ダメージ = 攻撃力 × スキル倍率 × ダメージ補正 × クリティカル補正 × 防御補正</p>
-<p>① 攻撃力 = 基礎攻撃力 × (1 + 攻撃力バフ%) + ギア攻撃力 + バフなどの実数値加算攻撃力<br>基礎攻撃力 = キャラ攻撃力 + 弧盤攻撃力</p>
-<p>② 防御補正 = 敵防御補正（デフォルト1.0）</p>
-<p>③ ダメージ補正 = (1 + 加算ダメージバフ)<br>加算ダメージバフ = 汎用ダメージ + 属性ダメージ + 与ダメージ + 特効ダメージ</p>
-<p>④ クリティカル補正 = 1 + クリティカルダメージ%</p>
-</div>
-</details>
-</div>
-
-<div class="card">
-
-  <div class="compact-title">
-    <h2>② 計算済み情報比較</h2>
-    <div class="small">期待値順ソート</div>
+    <h2>基本情報</h2>
+    <div style="line-height:1.9">
+      <p>NTE向けダメージ計算機です。</p>
+      <p>現在検証結果として信憑性が高いのではないかと言われている、計算式を元に作成しています。<br>検証した結果ある程度正しいかとは思いますが参考として利用してください。</p>
+      <h3>●数値の入力方法について●</h3>
+      <h4>◯簡易入力◯</h4>
+      <p>操作キャラのステータスに詳細表示されている数値をそのまま入力してください。<br>サクッとダメージの計算をしたい場合におすすめです。</p>
+      <h4>◯詳細入力◯</h4>
+      <p>キャラ、弧盤、ギアなどの情報を個別に入力可能です。<br>弧盤を変えた場合ギアを変えた場合など細かい検証にどうぞ。</p>
+      <h3>●データの保存について●</h3>
+      <p>下部にあるcsv書き出しで計算結果のダウンロードが可能です。<br>本サイトで再利用を行う際はjsonバックアップを行ってください。</p>
+    </div>
+    <details style="margin-top:12px">
+      <summary>基本計算式を表示</summary>
+      <div style="margin-top:12px;line-height:1.9">
+        <p>●基本計算式●</p>
+        <p>ダメージ = 攻撃力 × スキル倍率 × ダメージ補正 × クリティカル補正 × 防御補正</p>
+        <p>① 攻撃力 = 基礎攻撃力 × (1 + 攻撃力バフ%) + ギア攻撃力 + バフなどの実数値加算攻撃力<br>基礎攻撃力 = キャラ攻撃力 + 弧盤攻撃力</p>
+        <p>② 防御補正 = 1 / (1 + (敵防御率 × (1 - 防御無視率)))<br>・雑魚敵：約0.75<br>・ボス敵：約0.8<br>・防御無視率は 25% → 0.25 として計算</p>
+        <p>③ ダメージ補正 = (1 + 加算ダメージバフ)<br>加算ダメージバフ = 汎用ダメージ + 属性ダメージ + 与ダメージ + 特効ダメージ</p>
+        <p>④ クリティカル補正 = 1 + クリティカルダメージ%</p>
+      </div>
+    </details>
   </div>
 
-  <div class="table-wrap">
-
-    <table id="compareTable">
-
-      <thead>
-        <tr>
-          <th>順位</th>
-          <th>名前</th>
-          <th>最終攻撃力</th>
-          <th>クリ率</th>
-          <th>クリダメ率</th>
-          <th>非クリ</th>
-          <th>クリティカル</th>
-          <th>期待値</th>
-          <th>比率</th>
-          <th>比率グラフ</th>
-          <th>操作</th>
-        </tr>
-      </thead>
-
-      <tbody id="compareTableBody"></tbody>
-
-    </table>
-
+  <div class="card">
+    <div class="compact-title">
+      <h2>② 計算済み情報比較</h2>
+      <div class="small">期待値順ソート</div>
+    </div>
+    <div class="table-wrap">
+      <table id="compareTable">
+        <thead>
+          <tr>
+            <th>順位</th>
+            <th>名前</th>
+            <th>最終攻撃力</th>
+            <th>クリ率</th>
+            <th>クリダメ率</th>
+            <th>非クリ</th>
+            <th>クリティカル</th>
+            <th>期待値</th>
+            <th>比率</th>
+            <th>比率グラフ</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="compareTableBody"></tbody>
+      </table>
+    </div>
   </div>
-
-</div>
 
   <div class="card">
     <h2>③ 情報入力欄</h2>
-
-<div class="flex" style="margin-bottom:12px">
-  <button class="primary" id="showSimpleBtn" onclick="switchFormMode('simple')">簡易入力</button>
-  <button class="secondary" id="showDetailBtn" onclick="switchFormMode('detail')">詳細入力</button>
-</div>
-
-<div id="simpleFormSection" class="card">
-  <h3>簡易入力用フォーム</h3>
-
-  <div class="grid grid-3">
-    <label>入力名
-      <input
-  type="text"
-  id="simpleBuildName"
-  placeholder="例：炎特化"
-  oninput="this.value=this.value.replace(/'/g,'')">
-    </label>
-
-    <label>スキル倍率%（100%=1倍）
-      <input type="number" id="simpleSkillMultiplier" value="100">
-    </label>
-
-    <label>防御補正%（100%=等倍）
-      <input type="number" id="simpleDefMultiplier" value="100">
-    </label>
-  </div>
-
-  <h4 style="margin-top:14px">・基礎情報</h4>
-  <div class="grid grid-3">
-    <label>キャラ攻撃力
-      <input type="number" id="simpleAtk" value="0">
-    </label>
-
-    <label>増加攻撃力
-      <input type="number" id="simpleGearFlatAtk" value="0">
-    </label>
-
-    <label>クリティカル率%
-      <input type="number" id="simpleCritRate" value="0">
-    </label>
-
-    <label>クリティカルダメージ%
-      <input type="number" id="simpleCritDamage" value="0">
-    </label>
-
-    <label>汎用ダメージ強化%
-      <input type="number" id="simpleGeneralDamage" value="0">
-    </label>
-
-    <label>属性ダメージ強化%
-      <input type="number" id="simpleElementDamage" value="0">
-    </label>
-  </div>
-
-  <h4 style="margin-top:14px">・弧盤効果入力</h4>
-  <div class="grid grid-3">
-    <label>攻撃力%
-      <input type="number" id="simpleArcAtkPercent" value="0">
-    </label>
-
-    <label>与ダメ%
-      <input type="number" id="simpleArcDamage" value="0">
-    </label>
-
-    <label>クリ率%
-      <input type="number" id="simpleArcCritRate" value="0">
-    </label>
-
-    <label>クリダメ%
-      <input type="number" id="simpleArcCritDamage" value="0">
-    </label>
-
-    <label>属性ダメ%
-      <input type="number" id="simpleArcElement" value="0">
-    </label>
-  </div>
-
-  <h4 style="margin-top:14px">・ギア効果入力</h4>
-  <div class="grid grid-3">
-    <label>攻撃力%
-      <input type="number" id="simpleGearAtkPercent" value="0">
-    </label>
-
-    <label>与ダメ%
-      <input type="number" id="simpleGearDamage" value="0">
-    </label>
-
-    <label>クリ率%
-      <input type="number" id="simpleGearCritRate" value="0">
-    </label>
-
-    <label>クリダメ%
-      <input type="number" id="simpleGearCritDamage" value="0">
-    </label>
-
-    <label>属性ダメ%
-      <input type="number" id="simpleGearElement" value="0">
-    </label>
-  </div>
-</div>
-
-<div id="detailFormSection" class="card" style="display:none">
-<h3>詳細入力用フォーム</h3>
-<div style="margin-top:12px">
-
-    <div class="grid grid-2">
-      <label>
-        入力名
-        <input
-  type="text"
-  id="buildName"
-  placeholder="例：炎ビルド Ver1"
-  oninput="this.value=this.value.replace(/'/g,'')">
-      </label>
-
-      <label>
-        スキル倍率%（100% = 1倍）
-        <input type="number" id="skillMultiplier" value="100" step="0.1">
-      </label>
-
-      <label>
-        防御補正%（100% = 等倍）
-        <input type="number" id="defMultiplier" value="100" step="0.1">
-      </label>
+    <div class="flex" style="margin-bottom:12px">
+      <button class="primary" id="showSimpleBtn" onclick="switchFormMode('simple')">簡易入力</button>
+      <button class="secondary" id="showDetailBtn" onclick="switchFormMode('detail')">詳細入力</button>
     </div>
 
-    <h3>【操作キャラ】</h3>
-    <div class="grid grid-3">
-      <label>攻撃力<input type="number" id="charAtk" value="0"></label>
-      <label>クリ率%<input type="number" id="charCrit" value="0"></label>
-      <label>クリダメ%<input type="number" id="charCritDmg" value="0"></label>
+    <div id="simpleFormSection" class="card">
+      <h3>簡易入力用フォーム</h3>
+      <div class="grid grid-3">
+        <label>入力名
+          <input type="text" id="simpleBuildName" placeholder="例：炎特化" oninput="this.value=this.value.replace(/'/g,'')">
+        </label>
+        <label>スキル倍率%（100%=1倍）
+          <input type="number" id="simpleSkillMultiplier" value="100">
+        </label>
+        <label>敵防御率
+          <input type="number" id="simpleEnemyDefRate" value="0.8" step="0.01">
+        </label>
+        <label>防御無視率%
+          <input type="number" id="simpleDefIgnore" value="0" step="0.1">
+        </label>
+      </div>
+
+      <h4 style="margin-top:14px">・基礎情報</h4>
+      <div class="grid grid-3">
+        <label>キャラ攻撃力<input type="number" id="simpleAtk" value="0"></label>
+        <label>増加攻撃力<input type="number" id="simpleGearFlatAtk" value="0"></label>
+        <label>クリティカル率%<input type="number" id="simpleCritRate" value="0"></label>
+        <label>クリティカルダメージ%<input type="number" id="simpleCritDamage" value="0"></label>
+        <label>汎用ダメージ強化%<input type="number" id="simpleGeneralDamage" value="0"></label>
+        <label>属性ダメージ強化%<input type="number" id="simpleElementDamage" value="0"></label>
+      </div>
+
+      <h4 style="margin-top:14px">・弧盤効果入力</h4>
+      <div class="grid grid-3">
+        <label>攻撃力%<input type="number" id="simpleArcAtkPercent" value="0"></label>
+        <label>与ダメ%<input type="number" id="simpleArcDamage" value="0"></label>
+        <label>クリ率%<input type="number" id="simpleArcCritRate" value="0"></label>
+        <label>クリダメ%<input type="number" id="simpleArcCritDamage" value="0"></label>
+        <label>属性ダメ%<input type="number" id="simpleArcElement" value="0"></label>
+      </div>
+
+      <h4 style="margin-top:14px">・ギア効果入力</h4>
+      <div class="grid grid-3">
+        <label>攻撃力%<input type="number" id="simpleGearAtkPercent" value="0"></label>
+        <label>与ダメ%<input type="number" id="simpleGearDamage" value="0"></label>
+        <label>クリ率%<input type="number" id="simpleGearCritRate" value="0"></label>
+        <label>クリダメ%<input type="number" id="simpleGearCritDamage" value="0"></label>
+        <label>属性ダメ%<input type="number" id="simpleGearElement" value="0"></label>
+      </div>
     </div>
 
-    <h3>【弧盤】</h3>
-    <h4>メイン効果</h4>
-    <div class="grid grid-3">
-      <label>攻撃力<input type="number" id="arcAtk" value="0"></label>
-      <label>攻撃力%<input type="number" id="arcAtkPercent" value="0"></label>
-      <label>クリ率%<input type="number" id="arcCrit" value="0"></label>
-      <label>クリダメ%<input type="number" id="arcCritDmg" value="0"></label>
+    <div id="detailFormSection" class="card" style="display:none">
+      <h3>詳細入力用フォーム</h3>
+      <div style="margin-top:12px">
+        <div class="grid grid-2">
+          <label>入力名
+            <input type="text" id="buildName" placeholder="例：炎ビルド Ver1" oninput="this.value=this.value.replace(/'/g,'')">
+          </label>
+          <label>スキル倍率%（100% = 1倍）
+            <input type="number" id="skillMultiplier" value="100" step="0.1">
+          </label>
+          <label>敵防御率
+            <input type="number" id="enemyDefRate" value="0.8" step="0.01">
+          </label>
+          <label>防御無視率%
+            <input type="number" id="defIgnore" value="0" step="0.1">
+          </label>
+        </div>
+
+        <h3>【操作キャラ】</h3>
+        <div class="grid grid-3">
+          <label>攻撃力<input type="number" id="charAtk" value="0"></label>
+          <label>クリ率%<input type="number" id="charCrit" value="0"></label>
+          <label>クリダメ%<input type="number" id="charCritDmg" value="0"></label>
+        </div>
+
+        <h3>【弧盤】</h3>
+        <div class="grid grid-3" style="background: rgba(37, 99, 235, 0.05); padding: 12px; border-radius: 12px; margin-bottom: 12px; border: 1px solid rgba(37, 99, 235, 0.15);">
+          <label>弧盤プリセット
+            <select id="arcPresetSelect" onchange="onArcPresetChange()"></select>
+          </label>
+          <label>弧盤レベル (1〜80)
+            <input type="number" id="arcLevel" value="80" min="1" max="80" oninput="onArcPresetChange()">
+          </label>
+          <label>限界突破 (凸数 0〜5)
+            <select id="arcTarget" onchange="onArcPresetChange()">
+              <option value="0">0凸</option>
+              <option value="1">1凸</option>
+              <option value="2">2凸</option>
+              <option value="3">3凸</option>
+              <option value="4">4凸</option>
+              <option value="5" selected>5凸（完凸）</option>
+            </select>
+          </label>
+        </div>
+
+        <h4>メイン効果</h4>
+        <div class="grid grid-3">
+          <label>攻撃力<input type="number" id="arcAtk" value="0"></label>
+          <label>攻撃力%<input type="number" id="arcAtkPercent" value="0"></label>
+          <label>クリ率%<input type="number" id="arcCrit" value="0"></label>
+          <label>クリダメ%<input type="number" id="arcCritDmg" value="0"></label>
+        </div>
+
+        <h4>効果</h4>
+        <div class="grid grid-3">
+          <label>攻撃力%<input type="number" id="arcEffectAtk" value="0"></label>
+          <label>与ダメ%<input type="number" id="arcDamage" value="0"></label>
+          <label>クリダメ%<input type="number" id="arcEffectCritDmg" value="0"></label>
+          <label>特効ダメ%<input type="number" id="specialDamage" value="0"></label>
+        </div>
+
+        <h3>【ギア】</h3>
+        <h4>効果</h4>
+        <div class="grid grid-3">
+          <label>攻撃力%<input type="number" id="gearAtkPercent" value="0"></label>
+          <label>属性ダメ%<input type="number" id="gearElementDamage" value="0"></label>
+          <label>クリ率%<input type="number" id="gearCrit" value="0"></label>
+          <label>クリダメ%<input type="number" id="gearCritDmg" value="0"></label>
+        </div>
+
+        <h4>ステータスバフ</h4>
+        <div class="grid grid-3">
+          <label>ギア攻撃力(実数値)<input type="number" id="gearFlatAtk" value="0"></label>
+          <label>攻撃力%<input type="number" id="gearStatAtkPercent" value="0"></label>
+          <label>汎用ダメ%<input type="number" id="gearGeneralDamage" value="0"></label>
+          <label>クリ率%<input type="number" id="gearStatCrit" value="0"></label>
+          <label>クリダメ%<input type="number" id="gearStatCritDmg" value="0"></label>
+        </div>
+      </div>
     </div>
 
-    <h4>効果</h4>
-    <div class="grid grid-3">
-      <label>攻撃力%<input type="number" id="arcEffectAtk" value="0"></label>
-      <label>与ダメ%<input type="number" id="arcDamage" value="0"></label>
-      <label>クリダメ%<input type="number" id="arcEffectCritDmg" value="0"></label>
-      <label>特効ダメ%<input type="number" id="specialDamage" value="0"></label>
+    <div class="card">
+      <div class="compact-title">
+        <h2>バフ情報入力欄</h2>
+      </div>
+      <div class="small" style="margin-bottom:10px">
+        基本的にはキャラのスキルやパッシブに表示されている数値をそのまま入力すれば大丈夫です。<br>
+        複数発動する場合は＋ボタンで追加してください。<br>
+        プリセットから特定のスキルを選択すると、自動で計算用の枠に変換されます。
+      </div>
+      <div id="buffContainer"></div>
+      <div style="margin-top:10px">
+        <button type="button" class="primary" onclick="addBuffCard()">＋ バフ追加</button>
+      </div>
     </div>
-
-    <h3>【ギア】</h3>
-    <h4>効果</h4>
-    <div class="grid grid-3">
-      <label>攻撃力%<input type="number" id="gearAtkPercent" value="0"></label>
-      <label>属性ダメ%<input type="number" id="gearElementDamage" value="0"></label>
-      <label>クリ率%<input type="number" id="gearCrit" value="0"></label>
-      <label>クリダメ%<input type="number" id="gearCritDmg" value="0"></label>
-    </div>
-
-    <h4>ステータスバフ</h4>
-    <div class="grid grid-3">
-      <label>ギア攻撃力(実数値)<input type="number" id="gearFlatAtk" value="0"></label>
-      <label>攻撃力%<input type="number" id="gearStatAtkPercent" value="0"></label>
-      <label>汎用ダメ%<input type="number" id="gearGeneralDamage" value="0"></label>
-      <label>クリ率%<input type="number" id="gearStatCrit" value="0"></label>
-      <label>クリダメ%<input type="number" id="gearStatCritDmg" value="0"></label>
-    </div>
-
-    </div>
-</div>
-
-<div class="card">
-
-  <div class="compact-title">
-    <h2>バフ情報入力欄</h2>
-  </div>
-
-  <div class="small" style="margin-bottom:10px">
-
-    基本的にはキャラのスキルやパッシブに表示されている数値を
-    そのまま入力すれば大丈夫です。<br>
-
-    複数発動する場合は＋ボタンで追加してください。<br>
-
-    なお、一部キャラ（早霧、ハニア）などは
-    基礎攻撃力 + バフ% で計算するため、
-    それぞれの枠に入力すれば自動計算されます。
-
-  </div>
-
-  <div id="buffContainer"></div>
-
-  <div style="margin-top:10px">
-
-    <button
-      type="button"
-      class="primary"
-      onclick="addBuffCard()">
-
-      ＋ バフ追加
-
-    </button>
-
-  </div>
-
-</div>
 
     <div class="flex" style="margin-top:20px;align-items:center">
-      
-
       <button class="primary" onclick="calculateDamage()">計算実施</button>
       <button class="warn" onclick="resetForm()">入力リセット</button>
     </div>
@@ -436,1508 +224,20 @@ hr{
     </div>
   </div>
 
-<!-- =========================================
-     保存 / 読込
-========================================= -->
-
-<div class="card">
-
-  <div class="compact-title">
-    <h2>入力済み情報の書き出し / 読み込み</h2>
+  <div class="card">
+    <div class="compact-title">
+      <h2>入力済み情報の書き出し / 読み込み</h2>
+    </div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+      <button class="primary" type="button" onclick="exportCSV()">CSV書き出し</button>
+      <button class="secondary" type="button" onclick="exportJSON()">JSON保存</button>
+      <button class="secondary" type="button" onclick="document.getElementById('jsonFileInput').click()">JSON読込</button>
+      <input id="jsonFileInput" type="file" accept=".json" onchange="importJSON(event)" style="display:none">
+    </div>
   </div>
-
-  <div
-    style="
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:10px;
-    ">
-
-    <button
-      class="primary"
-      type="button"
-      onclick="exportCSV()">
-
-      CSV書き出し
-
-    </button>
-
-    <button
-      class="secondary"
-      type="button"
-      onclick="exportJSON()">
-
-      JSON保存
-
-    </button>
-
-<button
-  class="secondary"
-  type="button"
-  onclick="document.getElementById('jsonFileInput').click()">
-
-  JSON読込
-
-</button>
-
-<input
-  id="jsonFileInput"
-  type="file"
-  accept=".json"
-  onchange="importJSON(event)"
-  style="display:none">
-
-  </div>
-
 </div>
 
-<script>
-/* =========================================
-   NTE DAMAGE CALCULATOR
-   CLEAN COMPLETE SCRIPT
-========================================= */
-
-/* =========================================
-   状態管理
-========================================= */
-
-let currentFormMode = 'simple';
-let savedBuilds = [];
-
-/* =========================================
-   共通
-========================================= */
-
-function getNumber(id){
-  return Number(
-    document.getElementById(id)?.value || 0
-  );
-}
-
-/* =========================================
-   フォーム切替
-========================================= */
-
-function switchFormMode(mode){
-
-  currentFormMode = mode;
-
-  const simpleSection =
-    document.getElementById('simpleFormSection');
-
-  const detailSection =
-    document.getElementById('detailFormSection');
-
-  const simpleBtn =
-    document.getElementById('showSimpleBtn');
-
-  const detailBtn =
-    document.getElementById('showDetailBtn');
-
-  if(simpleSection){
-    simpleSection.style.display =
-      mode === 'simple'
-        ? 'block'
-        : 'none';
-  }
-
-  if(detailSection){
-    detailSection.style.display =
-      mode === 'detail'
-        ? 'block'
-        : 'none';
-  }
-
-  if(simpleBtn){
-    simpleBtn.className =
-      mode === 'simple'
-        ? 'primary'
-        : 'secondary';
-  }
-
-  if(detailBtn){
-    detailBtn.className =
-      mode === 'detail'
-        ? 'primary'
-        : 'secondary';
-  }
-}
-
-/* =========================================
-   バフ取得
-========================================= */
-
-function getBuffs(){
-
-
-  const buffs = [];
-
-  document
-    .querySelectorAll('.buff-row')
-    .forEach(row => {
-
-      buffs.push({
-
-name:
-  row.querySelector('.buff-name')
-    ?.value || '',
-
-        baseAtk:
-          Number(
-            row.querySelector('.buff-base-atk')
-              ?.value || 0
-          ),
-
-        skillAtk:
-          Number(
-            row.querySelector('.buff-ratio')
-              ?.value || 0
-          ),
-
-        atkPercent:
-          Number(
-            row.querySelector('.buff-atk-percent')
-              ?.value || 0
-          ),
-
-        critDmg:
-          Number(
-            row.querySelector('.buff-crit-dmg')
-              ?.value || 0
-          )
-
-      });
-
-    });
-
-  return buffs;
-}
-
-/* =========================================
-   メイン計算
-========================================= */
-
-function calculateDamage(){
-
-  let buildName = '未命名';
-
-  let finalAtk = 0;
-
-  let critRate = 0;
-  let critDamage = 0;
-
-let additiveDamage = 0;
-
-let atkPercent = 0;
-
-let skillMultiplier = 1;
-let defenseMultiplier = 1;
-
-  /* =====================================
-     簡易入力
-  ===================================== */
-
-  if(currentFormMode === 'simple'){
-
-    buildName =
-      document.getElementById(
-        'simpleBuildName'
-      )?.value.trim();
-
-    if(!buildName){
-      alert('入力名を設定してください');
-      return;
-    }
-
-    const characterAtk =
-      getNumber('simpleAtk');
-
-    const gearFlatAtk =
-      getNumber('simpleGearFlatAtk');
-
-    atkPercent = (
-
-      getNumber('simpleArcAtkPercent') +
-
-      getNumber('simpleGearAtkPercent') +
-
-      getBuffs().reduce(
-        (sum,b)=>sum+b.atkPercent,
-        0
-      )
-
-    ) / 100;
-
-    critRate = Math.min(
-      100,
-
-      getNumber('simpleCritRate') +
-
-      getNumber('simpleArcCritRate') +
-
-      getNumber('simpleGearCritRate')
-
-    );
-
-    critDamage = (
-
-      getNumber('simpleCritDamage') +
-
-      getNumber('simpleArcCritDamage') +
-
-      getNumber('simpleGearCritDamage') +
-
-      getBuffs().reduce(
-        (sum,b)=>sum+b.critDmg,
-        0
-      )
-
-    ) / 100;
-
-    additiveDamage = (
-
-      getNumber('simpleGeneralDamage') +
-
-      getNumber('simpleElementDamage') +
-
-      getNumber('simpleArcDamage') +
-
-      getNumber('simpleArcElement') +
-
-      getNumber('simpleGearDamage') +
-
-      getNumber('simpleGearElement')
-
-    ) / 100;
-
-    skillMultiplier =
-      getNumber(
-        'simpleSkillMultiplier'
-      ) / 100;
-
-    defenseMultiplier =
-      getNumber(
-        'simpleDefMultiplier'
-      ) / 100;
-
-    const flatBuffAtk =
-      getBuffs().reduce(
-        (sum,b)=>
-          sum + (
-            b.baseAtk *
-            (b.skillAtk / 100)
-          ),
-        0
-      );
-
-    finalAtk =
-
-      (
-        characterAtk *
-        (1 + atkPercent)
-      )
-
-      +
-
-      gearFlatAtk
-
-      +
-
-      flatBuffAtk;
-  }
-
-  /* =====================================
-     詳細入力
-  ===================================== */
-
-  else {
-
-    buildName =
-      document.getElementById(
-        'buildName'
-      )?.value.trim();
-
-    if(!buildName){
-      alert('入力名を設定してください');
-      return;
-    }
-
-    const charAtk =
-      getNumber('charAtk');
-
-    const arcAtk =
-      getNumber('arcAtk');
-
-    const baseAtk =
-      charAtk + arcAtk;
-
-    atkPercent = (
-
-      getNumber('arcAtkPercent') +
-
-      getNumber('arcEffectAtk') +
-
-      getNumber('gearAtkPercent') +
-
-      getNumber('gearStatAtkPercent') +
-
-      getBuffs().reduce(
-        (sum,b)=>sum+b.atkPercent,
-        0
-      )
-
-    ) / 100;
-
-    const flatGearAtk =
-      getNumber('gearFlatAtk');
-
-    const flatSkillAtk =
-      getBuffs().reduce(
-        (sum,b)=>
-          sum + (
-            b.baseAtk *
-            (b.skillAtk / 100)
-          ),
-        0
-      );
-
-    finalAtk =
-
-      (
-        baseAtk *
-        (1 + atkPercent)
-      )
-
-      +
-
-      flatGearAtk
-
-      +
-
-      flatSkillAtk;
-
-    additiveDamage = (
-
-      getNumber('gearGeneralDamage') +
-
-      getNumber('gearElementDamage') +
-
-      getNumber('arcDamage') +
-
-      getNumber('specialDamage')
-
-    ) / 100;
-
-    critRate = Math.min(
-      100,
-
-      getNumber('charCrit') +
-
-      getNumber('arcCrit') +
-
-      getNumber('gearCrit') +
-
-      getNumber('gearStatCrit')
-    );
-
-    critDamage = (
-
-      getNumber('charCritDmg') +
-
-      getNumber('arcCritDmg') +
-
-      getNumber('arcEffectCritDmg') +
-
-      getNumber('gearCritDmg') +
-
-      getNumber('gearStatCritDmg') +
-
-      getBuffs().reduce(
-        (sum,b)=>sum+b.critDmg,
-        0
-      )
-
-    ) / 100;
-
-    skillMultiplier =
-      getNumber('skillMultiplier') / 100;
-
-    defenseMultiplier =
-      getNumber('defMultiplier') / 100;
-  }
-
-const atkPercentDisplay =
-  (atkPercent * 100).toFixed(1);
-
-const additiveDamageDisplay =
-  (additiveDamage * 100).toFixed(1);
-
-const critDamageDisplay =
-  (critDamage * 100).toFixed(1);
-
-  /* =====================================
-     ダメージ計算
-  ===================================== */
-
-  const damageMultiplier =
-    1 + additiveDamage;
-
-  const expectedCritMultiplier =
-    1 + (
-      (critRate / 100)
-      * critDamage
-    );
-
-  const nonCritDamage =
-
-    finalAtk
-
-    *
-
-    skillMultiplier
-
-    *
-
-    damageMultiplier
-
-    *
-
-    defenseMultiplier;
-
-  const critDamageValue =
-
-    nonCritDamage
-
-    *
-
-    (1 + critDamage);
-
-  const expectedDamage =
-
-    nonCritDamage
-
-    *
-
-    expectedCritMultiplier;
-
-/* =====================================
-   伸び率分析
-===================================== */
-
-const currentExpected =
-  expectedDamage;
-
-/* 攻撃% +1% */
-
-const atkUpExpected =
-
-  (
-    nonCritDamage
-    *
-    (
-      (
-        finalAtk * 0.01
-      ) / finalAtk
-      + 1
-    )
-  )
-
-  *
-
-  expectedCritMultiplier;
-
-/* ダメバフ +1% */
-
-const dmgBuffExpected =
-
-  finalAtk
-
-  *
-
-  skillMultiplier
-
-  *
-
-  (damageMultiplier + 0.01)
-
-  *
-
-  defenseMultiplier
-
-  *
-
-  expectedCritMultiplier;
-
-/* クリダメ +1% */
-
-const critDmgExpected =
-
-  nonCritDamage
-
-  *
-
-  (
-    1 +
-    (
-      (critRate / 100)
-      *
-      (critDamage + 0.01)
-    )
-  );
-
-/* 上昇率 */
-
-const atkGain =
-  atkUpExpected -
-  currentExpected;
-
-const dmgGain =
-  dmgBuffExpected -
-  currentExpected;
-
-const critGain =
-  critDmgExpected -
-  currentExpected;
-
-/* 最大判定 */
-
-let recommendText = '';
-
-if(
-  atkGain >= dmgGain &&
-  atkGain >= critGain
-){
-
-  recommendText =
-    '現在は「攻撃力%」を伸ばす効率が最も高いです。';
-
-}
-else if(
-  dmgGain >= critGain
-){
-
-  recommendText =
-    '現在は「ダメージバフ」を伸ばす効率が最も高いです。';
-
-}
-else{
-
-  recommendText =
-    '現在は「クリティカルダメージ」を伸ばす効率が最も高いです。';
-
-}
-
-/* =====================================
-   結果表示
-===================================== */
-
-document.getElementById(
-  'resultContent'
-).innerHTML = `
-
-  <p>
-    <b>最終攻撃力:</b>
-    ${Math.round(finalAtk).toLocaleString()}
-  </p>
-
-  <p style="font-size:12px;color:#64748b">
-    (
-      基礎攻撃力 × (1 + 攻撃力%)
-    )
-    + 実数攻撃力
-  </p>
-
-  <p style="font-size:12px;color:#64748b">
-    (
-      ${Math.round(
-        currentFormMode === 'simple'
-          ? getNumber('simpleAtk')
-          : (
-              getNumber('charAtk') +
-              getNumber('arcAtk')
-            )
-      ).toLocaleString()}
-      ×
-      (1 + ${atkPercentDisplay}%)
-    )
-    +
-    ${Math.round(
-      currentFormMode === 'simple'
-        ? getNumber('simpleGearFlatAtk')
-        : getNumber('gearFlatAtk')
-    ).toLocaleString()}
-  </p>
-
-  <hr>
-
-  <p>
-    <b>非クリダメージ:</b>
-    ${Math.round(nonCritDamage).toLocaleString()}
-  </p>
-
-  <p style="font-size:12px;color:#64748b">
-    ${Math.round(finalAtk).toLocaleString()}
-    ×
-    ${skillMultiplier.toFixed(2)}
-    ×
-    (1 + ${additiveDamageDisplay}%)
-    ×
-    ${defenseMultiplier.toFixed(2)}
-  </p>
-
-  <hr>
-
-  <p>
-    <b>クリティカルダメージ:</b>
-    ${Math.round(critDamageValue).toLocaleString()}
-  </p>
-
-  <p style="font-size:12px;color:#64748b">
-    ${Math.round(nonCritDamage).toLocaleString()}
-    ×
-    (1 + ${critDamageDisplay}%)
-  </p>
-
-  <hr>
-
-  <p>
-    <b>期待値ダメージ:</b>
-    ${Math.round(expectedDamage).toLocaleString()}
-  </p>
-
-  <p style="font-size:12px;color:#64748b">
-    ${Math.round(nonCritDamage).toLocaleString()}
-    ×
-    (
-      1 +
-      (
-        ${critRate.toFixed(1)}%
-        ×
-        ${critDamageDisplay}%
-      )
-    )
-  </p>
-
-  <hr>
-
-  <div class="formula-box">
-
-    <b>推奨分析</b><br><br>
-
-    ${recommendText}<br><br>
-
-    攻撃力% +1%：
-    +${Math.round(atkGain).toLocaleString()}<br>
-
-    ダメージバフ +1%：
-    +${Math.round(dmgGain).toLocaleString()}<br>
-
-    クリダメ +1%：
-    +${Math.round(critGain).toLocaleString()}
-
-    <br><br>
-
-    現在比率<br>
-
-    攻撃力%：
-    ${atkPercentDisplay}%<br>
-
-    ダメージバフ：
-    ${additiveDamageDisplay}%<br>
-
-    クリダメ：
-    ${critDamageDisplay}%
-
-    ${
-      critRate < 70
-      ? `
-      <br><br>
-      <span style="color:#f59e0b">
-        ※クリティカル率が低めです
-      </span>
-      `
-      : ''
-    }
-
-    ${
-      critRate >= 100
-      ? `
-      <br><br>
-      <span style="color:#ef4444">
-        ※クリティカル率が100%を超えています
-      </span>
-      `
-      : ''
-    }
-
-  </div>
-
-`;
-
-  /* =====================================
-     保存
-  ===================================== */
-
-const buildData = {
-
-  mode: currentFormMode,
-
-  buildName,
-
-  finalAtk,
-
-  critRate,
-
-  critDamage,
-
-  additiveDamage,
-
-  skillMultiplier,
-
-  defenseMultiplier,
-
-  nonCritDamage,
-
-  critDamageValue,
-
-  expectedDamage,
-
-  formData: collectCurrentFormData(),
-
-  buffs: getBuffs()
-
-};
-
-  const existingIndex =
-    savedBuilds.findIndex(
-      b => b.buildName === buildName
-    );
-
-  if(existingIndex >= 0){
-
-    savedBuilds[existingIndex] =
-      buildData;
-
-  }else{
-
-    savedBuilds.push(buildData);
-
-  }
-
-  renderBuildTable();
-
-localStorage.setItem(
-  'nte_saved_builds',
-  JSON.stringify(savedBuilds)
-);
-}
-
-function collectCurrentFormData(){
-
-  const data = {};
-
-  document
-    .querySelectorAll('input')
-    .forEach(el => {
-
-      if(el.id){
-
-        data[el.id] = el.value;
-
-      }
-
-    });
-
-  return data;
-}
-
-function loadBuild(name){
-
-  const build =
-    savedBuilds.find(
-      b => b.buildName === name
-    );
-
-  if(!build) return;
-
-  /* =========================
-     フォーム切替
-  ========================= */
-
-  switchFormMode(build.mode);
-
-  /* =========================
-     入力復元
-  ========================= */
-
-  Object.entries(build.formData)
-    .forEach(([id,value]) => {
-
-      const el =
-        document.getElementById(id);
-
-      if(el){
-
-        el.value = value;
-
-      }
-
-    });
-
-  /* =========================
-     バフ復元
-  ========================= */
-
-  const wrap =
-    document.getElementById(
-      'buffContainer'
-    );
-
-  wrap.innerHTML = '';
-
-  if(build.buffs?.length){
-
-    build.buffs.forEach(buff => {
-
-      addBuffCard();
-
-      const rows =
-        document.querySelectorAll(
-          '.buff-row'
-        );
-
-      const row =
-        rows[rows.length - 1];
-
-      row.querySelector(
-        '.buff-name'
-      ).value =
-        buff.name || '';
-
-      row.querySelector(
-        '.buff-base-atk'
-      ).value =
-        buff.baseAtk || 0;
-
-      row.querySelector(
-        '.buff-ratio'
-      ).value =
-        buff.skillAtk || 0;
-
-      row.querySelector(
-        '.buff-atk-percent'
-      ).value =
-        buff.atkPercent || 0;
-
-      row.querySelector(
-        '.buff-crit-dmg'
-      ).value =
-        buff.critDmg || 0;
-
-    });
-
-  } else {
-
-    addBuffCard();
-
-  }
-
-  calculateDamage();
-}
-
-/* =========================================
-   比較テーブル
-========================================= */
-
-function renderBuildTable(){
-
-  const tbody =
-    document.getElementById(
-      'compareTableBody'
-    );
-
-  if(!tbody) return;
-
-  tbody.innerHTML = '';
-
-  if(savedBuilds.length === 0){
-    return;
-  }
-
-  savedBuilds.sort(
-    (a,b)=>
-      b.expectedDamage -
-      a.expectedDamage
-  );
-
-  const topDamage =
-    savedBuilds[0].expectedDamage;
-
-  savedBuilds.forEach((b,index)=>{
-
-    const ratio =
-      (
-        b.expectedDamage /
-        topDamage
-      ) * 100;
-
-    const tr =
-      document.createElement('tr');
-
-    if(index === 0){
-      tr.classList.add('rank1');
-    }
-
-    tr.innerHTML = `
-
-      <td>${index + 1}</td>
-
-      <td>${b.buildName}</td>
-
-      <td>${Math.round(b.finalAtk).toLocaleString()}</td>
-
-      <td>${b.critRate.toFixed(1)}%</td>
-
-      <td>${(b.critDamage*100).toFixed(1)}%</td>
-
-      <td>${Math.round(b.nonCritDamage).toLocaleString()}</td>
-
-      <td>${Math.round(b.critDamageValue).toLocaleString()}</td>
-
-      <td>${Math.round(b.expectedDamage).toLocaleString()}</td>
-
-      <td>${ratio.toFixed(1)}%</td>
-
-      <td>
-        <div class="progress-wrap">
-          <div
-            class="progress-bar"
-            style="width:${ratio}%">
-          </div>
-        </div>
-      </td>
-
-<td>
-
-  <button
-    class="secondary"
-    onclick="loadBuild('${b.buildName}')">
-
-    読込
-
-  </button>
-
-  <button
-    class="danger"
-    onclick="deleteBuild('${b.buildName}')">
-
-    削除
-
-  </button>
-
-</td>
-    `;
-
-    tbody.appendChild(tr);
-
-  });
-}
-
-/* =========================================
-   削除
-========================================= */
-
-function deleteBuild(name){
-
-  savedBuilds =
-    savedBuilds.filter(
-      b => b.buildName !== name
-    );
-
-  renderBuildTable();
-}
-
-/* =========================================
-   バフカード追加
-========================================= */
-
-function addBuffCard(){
-
-  const wrap =
-    document.getElementById('buffContainer');
-
-  if(!wrap) return;
-
-  const div =
-    document.createElement('div');
-
-  div.className = 'buff-row card';
-
-  div.style.marginTop = '10px';
-
-  div.innerHTML = `
-
-    <div
-      class="buff-inline"
-      style="
-        display:flex;
-        gap:10px;
-        flex-wrap:wrap;
-        align-items:flex-end;
-      ">
-
-      <label style="min-width:140px">
-        バフ名
-        <input
-          type="text"
-          class="buff-name"
-          placeholder="例：ハニアULT">
-      </label>
-
-      <label>
-        基礎攻撃力
-        <input
-          type="number"
-          class="buff-base-atk"
-          value="0">
-      </label>
-
-      <label>
-        攻撃力ボーナス%
-        <input
-          type="number"
-          class="buff-ratio"
-          value="0">
-      </label>
-
-      <label>
-        攻撃力%
-        <input
-          type="number"
-          class="buff-atk-percent"
-          value="0">
-      </label>
-
-      <label>
-        クリダメ%
-        <input
-          type="number"
-          class="buff-crit-dmg"
-          value="0">
-      </label>
-
-      <button
-        class="danger"
-        type="button"
-        onclick="this.closest('.buff-row').remove()"
-        style="height:38px">
-
-        削除
-
-      </button>
-
-    </div>
-
-  `;
-
-  wrap.appendChild(div);
-}
-
-/* =========================================
-   初期化
-========================================= */
-
-window.addEventListener('DOMContentLoaded', () => {
-
-  switchFormMode('simple');
-
-  /* 初期バフ1個 */
-
-  if(
-    document.querySelectorAll('.buff-row')
-      .length === 0
-  ){
-    addBuffCard();
-  }
-
-  /* =========================
-     自動保存読込
-  ========================= */
-
-  const autoSave =
-    localStorage.getItem(
-      'nte_saved_builds'
-    );
-
-  if(autoSave){
-
-    try{
-
-      savedBuilds =
-        JSON.parse(autoSave);
-
-    }catch(e){
-
-      console.error(e);
-
-    }
-
-  }
-
-  /* =========================
-     テーブル描画
-  ========================= */
-
-  renderBuildTable();
-
-});
-
-/* =========================================
-   CSV書き出し
-========================================= */
-
-function exportCSV(){
-
-  if(savedBuilds.length === 0){
-
-    alert('保存データがありません');
-
-    return;
-  }
-
-  const sorted = [...savedBuilds]
-    .sort(
-      (a,b)=>
-        b.expectedDamage -
-        a.expectedDamage
-    );
-
-  const topDamage =
-    sorted[0].expectedDamage;
-
-  const rows = [];
-
-  rows.push([
-
-    '順位',
-    '名前',
-    '最終攻撃力',
-    'クリ率',
-    'クリダメ率',
-    '非クリ',
-    'クリティカル',
-    '期待値',
-    '比率',
-    '比率グラフ',
-    '操作'
-
-  ]);
-
-  sorted.forEach((b,index)=>{
-
-    const ratio =
-      (
-        b.expectedDamage /
-        topDamage
-      ) * 100;
-
-    const graph =
-      '■'.repeat(
-        Math.max(
-          1,
-          Math.round(ratio / 5)
-        )
-      );
-
-    rows.push([
-
-      index + 1,
-
-      b.buildName,
-
-      Math.round(b.finalAtk),
-
-      `${b.critRate.toFixed(1)}%`,
-
-      `${(b.critDamage * 100).toFixed(1)}%`,
-
-      Math.round(b.nonCritDamage),
-
-      Math.round(b.critDamageValue),
-
-      Math.round(b.expectedDamage),
-
-      `${ratio.toFixed(1)}%`,
-
-      graph,
-
-      ''
-
-    ]);
-
-  });
-
-  const csv = rows
-    .map(r =>
-      r.map(v =>
-        `"${String(v).replace(/"/g,'""')}"`
-      ).join(',')
-    )
-    .join('\n');
-
-  const blob =
-    new Blob(
-      [csv],
-      {type:'text/csv;charset=utf-8;'}
-    );
-
-  const url =
-    URL.createObjectURL(blob);
-
-  const a =
-    document.createElement('a');
-
-  a.href = url;
-
-  a.download =
-    'nte_damage_compare.csv';
-
-  a.click();
-
-  URL.revokeObjectURL(url);
-}
-
-/* =========================================
-   JSON保存
-========================================= */
-
-function exportJSON(){
-
-  if(savedBuilds.length === 0){
-
-    alert('保存データがありません');
-
-    return;
-  }
-
-  const data = {
-
-    version: 1,
-
-    exportDate:
-      new Date().toISOString(),
-
-    builds:
-      savedBuilds
-
-  };
-
-  const json =
-    JSON.stringify(
-      data,
-      null,
-      2
-    );
-
-  const blob =
-    new Blob(
-      [json],
-      {
-        type:'application/json'
-      }
-    );
-
-  const url =
-    URL.createObjectURL(blob);
-
-  const a =
-    document.createElement('a');
-
-  a.href = url;
-
-  a.download =
-    'nte_damage_backup.json';
-
-  a.click();
-
-  URL.revokeObjectURL(url);
-}
-
-/* =========================================
-   JSON読込
-========================================= */
-
-function importJSON(event){
-
-  const file =
-    event.target.files[0];
-
-  if(!file) return;
-
-  const reader =
-    new FileReader();
-
-  reader.onload = e => {
-
-    try{
-
-      const json =
-        JSON.parse(e.target.result);
-
-      if(
-        !json.builds ||
-        !Array.isArray(json.builds)
-      ){
-
-        alert(
-          '不正なJSONです'
-        );
-
-        return;
-      }
-
-      savedBuilds =
-        json.builds;
-
-      renderBuildTable();
-
-      /* 最初のデータを自動読込 */
-
-      if(savedBuilds.length > 0){
-
-        loadBuild(
-          savedBuilds[0].buildName
-        );
-
-      }
-
-      alert(
-        'JSONを読み込みました'
-      );
-
-    }catch(error){
-
-      console.error(error);
-
-      alert(
-        'JSON読込に失敗しました'
-      );
-
-    }
-
-  };
-
-  reader.readAsText(file);
-}
-
-function resetForm(){
-
-  /* =====================================
-     簡易入力フォーム
-  ===================================== */
-
-  document
-    .querySelectorAll(
-      '#simpleFormSection input'
-    )
-    .forEach(el => {
-
-      if(el.type === 'number'){
-
-        if(
-          el.id === 'simpleSkillMultiplier' ||
-          el.id === 'simpleDefMultiplier'
-        ){
-
-          el.value = 100;
-
-        }else{
-
-          el.value = 0;
-
-        }
-
-      }else{
-
-        el.value = '';
-
-      }
-
-    });
-
-  /* =====================================
-     詳細入力フォーム
-  ===================================== */
-
-  document
-    .querySelectorAll(
-      '#detailFormSection input'
-    )
-    .forEach(el => {
-
-      if(el.type === 'number'){
-
-        if(
-          el.id === 'skillMultiplier' ||
-          el.id === 'defMultiplier'
-        ){
-
-          el.value = 100;
-
-        }else{
-
-          el.value = 0;
-
-        }
-
-      }else{
-
-        el.value = '';
-
-      }
-
-    });
-
-  /* =====================================
-     バフフォーム
-  ===================================== */
-
-  const buffContainer =
-    document.getElementById(
-      'buffContainer'
-    );
-
-  buffContainer.innerHTML = '';
-
-  addBuffCard();
-
-  /* =====================================
-     結果表示
-  ===================================== */
-
-  document.getElementById(
-    'resultContent'
-  ).innerHTML = '未計算';
-
-  document.getElementById(
-    'recommendContent'
-  ).innerHTML = '';
-}
-function deleteBuild(name){
-
-  savedBuilds =
-    savedBuilds.filter(
-      b => b.buildName !== name
-    );
-
-  renderBuildTable();
-
-  localStorage.setItem(
-    'nte_saved_builds',
-    JSON.stringify(savedBuilds)
-  );
-}
-</script>
+<script src="data.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
